@@ -102,6 +102,18 @@ Mainwin::Mainwin() : store{new Store{}} {
     helpmenu->append(*menuitem_about);
 
 
+	data = Gtk::manage(new Gtk::Label());
+	data->set_hexpand(true);
+	data->set_vexpand(true);
+	vbox->add(*data);
+
+
+	msg = Gtk::manage(new Gtk::Label());
+	msg->set_hexpand(true);
+	msg->override_background_color(Gdk::RGBA{"gray"});
+	vbox->pack_start(*msg, Gtk::PACK_SHRINK, 0);
+
+
     // Make the box and everything in it visible
     vbox->show_all();
 
@@ -153,6 +165,9 @@ void Mainwin::on_view_customer_click(){
 	for(int i = 0; i < store->num_customers(); i++){
 		oss << i << ") " << store->customer(i) << "\n";
 	}
+
+	set_data(oss.str());
+	set_msg("");
 }
 
 void Mainwin::on_insert_peripheral_click(){
@@ -168,6 +183,8 @@ void Mainwin::on_insert_peripheral_click(){
 		std::cerr << "###INVALID PRICE ### \n\n";
 		std::cin.ignore(32767, '\n');
 	}
+
+	set_msg("Peripheral successful.");
 	on_view_peripheral_click();
 }
 
@@ -192,6 +209,7 @@ void Mainwin::on_insert_desktop_click(){
 			std::cerr << "INVALID OPTION \n \n";
 		}
 	}
+	set_msg("Desktop successful.");
 	on_view_desktop_click();
 }
 
@@ -227,6 +245,7 @@ void Mainwin::on_insert_order_click(){
 		desktop = 0;
 		}
 	}
+	set_msg("Order successful.");
 	on_view_order_click();
 }
 
@@ -239,6 +258,8 @@ void Mainwin::on_insert_customer_click(){
 		Customer customer{name, phone, email};
 		store->add_customer(customer);
 	}
+
+	set_msg("Customer successful.");
 	on_view_customer_click();
 }
 
