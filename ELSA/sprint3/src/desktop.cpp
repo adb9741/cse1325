@@ -1,4 +1,5 @@
 #include "desktop.h"
+#include <fstream>
 
 Desktop::Desktop()
 {
@@ -7,7 +8,17 @@ Desktop::Desktop()
 
 Desktop::Desktop(std::istream& ist)
 {
+    int numofoptions;
+    std::string size;
 
+    getline(ist, size);
+    numofoptions = stoi(size);
+
+    for(int i = 0; i < numofoptions; i++){
+        Options* option = new Options(ist);
+        options.push_back(option);
+    }
+    
 }
 
 void Desktop::add_option(Options& option) 
@@ -31,5 +42,8 @@ std::ostream& operator<<(std::ostream& ost, const Desktop& desktop)
 
 void Desktop::save(std::ostream& ost)
 {
-    ost << *this;
+    ost << options.size() << std::endl;
+    for (int i = 0; i < options.size(); i++) {
+        options.at(i)->save(ost);
+    }
 }

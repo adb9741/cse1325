@@ -3,6 +3,8 @@
 
 #include "customer.h"
 #include "desktop.h"
+#include <fstream>
+#include <string>
 
 class Order {
   public:

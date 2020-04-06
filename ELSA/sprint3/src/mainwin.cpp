@@ -107,12 +107,21 @@ Mainwin::Mainwin() : store{new Store{}}, filename{"untitled.elsa"}
 	menuitem_easter->signal_activate().connect([this] {this->on_easter_egg_click();});
 	helpmenu->append(*menuitem_easter);
 
-	std::ifstream fp;
-	fp.open("test.txt");
-	// Options c = Options{"test", (double)22};
+	// std::ofstream fp;
+	// fp.open("test.txt");
+	// Options op = Options{"teaesrth", 33};
+	// Desktop c = Desktop{};
+	// c.add_option(op);
+	// c.add_option(op);
+	// c.add_option(op);
+	// c.add_option(op);
 	// c.save(fp);
-	Options c = Options(fp);
-	std::cout << c;
+
+	// std::ifstream fp;
+	// fp.open("test.txt");
+	// Desktop c = Desktop(fp);
+	// std::cout << c;
+	// std::cout << c;
 
 	//DISPLAY WINDOW
 	data = Gtk::manage(new Gtk::Label());
@@ -147,8 +156,9 @@ void Mainwin::on_view_peripheral_click()
 void Mainwin::on_view_desktop_click()
 {
 	std::ostringstream oss;
-	for(int i=0; i < store->num_desktops(); i++)
+	for(int i=0; i < store->num_desktops(); i++){
 	        oss << i << ") " << store->desktop(i) << "\n";
+	}
 	set_data(oss.str());
 	set_msg("");
 }
@@ -218,6 +228,7 @@ void Mainwin::on_insert_order_click()
 	} catch(std::exception& e) {
 		std::cerr << "#### UNABLE TO CREATE ORDER FOR CUSTOMER " 
 			<< customer << " ####\n\n"; 
+		// std::cerr << store->customers.at(customer);
 	}
 
 	while(desktop >= 0) {		
