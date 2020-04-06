@@ -3,7 +3,6 @@
 #include <iostream>
 #include <gtkmm.h>
 
-
 class EntryDialog : public Gtk::MessageDialog {
 public:
 	EntryDialog(Gtk::Window& parent,

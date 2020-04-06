@@ -1,14 +1,35 @@
 #include "desktop.h"
 
-void Desktop::add_option(Options& option) {options.push_back(&option);}
-double Desktop::price() {
+Desktop::Desktop()
+{
+
+}
+
+Desktop::Desktop(std::istream& ist)
+{
+
+}
+
+void Desktop::add_option(Options& option) 
+{
+	options.push_back(&option);
+}
+
+double Desktop::price() 
+{
     double p = 0.0;
     for(auto o : options) p+= o->cost();
     return p;
 }
-std::ostream& operator<<(std::ostream& ost, const Desktop& desktop) {
+
+std::ostream& operator<<(std::ostream& ost, const Desktop& desktop) 
+{
     ost << "Desktop includes";
     for(auto o : desktop.options) ost << "\n  " << *o;
     return ost;
 }
 
+void Desktop::save(std::ostream& ost)
+{
+    ost << *this;
+}

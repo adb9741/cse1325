@@ -1,5 +1,20 @@
 #include "store.h"
 
+Store::Store()
+{
+
+}
+
+Store::Store(std::istream& ist)
+{
+
+}
+
+void Store::save(std::ostream& ost)
+{
+
+}
+
 //
 // Customers
 //

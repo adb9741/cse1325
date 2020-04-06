@@ -8,6 +8,9 @@
 
 class Store {
   public:
+    Store();
+    Store(std::istream& ist);
+    void save(std::ostream& ost);
     void add_customer(Customer& customer);
     int num_customers();
     Customer& customer(int index);

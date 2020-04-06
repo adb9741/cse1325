@@ -1,323 +1,437 @@
 #include "mainwin.h"
-#include <iostream> 
+#include <sstream>
 
-Mainwin::Mainwin() : store{new Store{}} {
+Mainwin::Mainwin() : store{new Store{}}, filename{"untitled.elsa"}
+{
+	set_default_size(400, 600);
+	set_title("ELSA");
 
-    // /////////////////
-    // G U I   S E T U P
-    // /////////////////
+	Gtk::Box *vbox = Gtk::manage(new Gtk::VBox);
+    	add(*vbox);
 
-    set_default_size(400, 200);
-    set_title("ELSA");
+	//MENU BAR
+	Gtk::MenuBar *menubar = Gtk::manage(new Gtk::MenuBar);
+	vbox->pack_start(*menubar, Gtk::PACK_SHRINK, 0);
 
-    // Put a vertical box container as the Window contents
-    Gtk::Box *vbox = Gtk::manage(new Gtk::VBox);
-    add(*vbox);
+	//	FILE
+	Gtk::MenuItem *menuitem_file = Gtk::manage(new Gtk::MenuItem("_File", true));
+	menubar->append(*menuitem_file);
+	Gtk::Menu *filemenu = Gtk::manage(new Gtk::Menu());
+	menuitem_file->set_submenu(*filemenu);
 
-    // /////// ////////////////////////////////////////////////////////////////
-    // M E N U
-    //
-    Gtk::MenuBar *menubar = Gtk::manage(new Gtk::MenuBar);
-    vbox->pack_start(*menubar, Gtk::PACK_SHRINK, 0);
-    // vbox->add(*menubar);
+	//		FILE > OPEN
+	Gtk::MenuItem *menuitem_open = Gtk::manage(new Gtk::MenuItem("_Open", true));
+	menuitem_open->signal_activate().connect([this] {this->on_open_click();});
+	filemenu->append(*menuitem_open);
 
-    //     F I L E
-    // Create a File menu and add to the menu bar
-    Gtk::MenuItem *menuitem_file = Gtk::manage(new Gtk::MenuItem("File", true));
-    menubar->append(*menuitem_file);
-    Gtk::Menu *filemenu = Gtk::manage(new Gtk::Menu());
-    menuitem_file->set_submenu(*filemenu);
+	//		FILE > SAVE
+	Gtk::MenuItem *menuitem_save = Gtk::manage(new Gtk::MenuItem("_Save", true));
+	menuitem_save->signal_activate().connect([this] {this->on_save_click();});
+	filemenu->append(*menuitem_save);
 
+	//		FILE > SAVE AS
+	Gtk::MenuItem *menuitem_saveas = Gtk::manage(new Gtk::MenuItem("_Save As", true));
+	menuitem_saveas->signal_activate().connect([this] {this->on_save_as_click();});
+	filemenu->append(*menuitem_saveas);
 
-    //         Q U I T
-    // Append Quit to the File menu
-    Gtk::MenuItem *menuitem_quit = Gtk::manage(new Gtk::MenuItem("Quit", true));
-    menuitem_quit->signal_activate().connect([this] {this->on_quit_click();});
-    filemenu->append(*menuitem_quit);
+	//		FILE > QUIT
+	Gtk::MenuItem *menuitem_quit = Gtk::manage(new Gtk::MenuItem("_Quit", true));
+	menuitem_quit->signal_activate().connect([this] {this->on_quit_click();});
+	filemenu->append(*menuitem_quit);
 
-	//VIEW
-	Gtk::MenuItem *menuitem_view = Gtk::manage(new Gtk::MenuItem("View", true));
-    menubar->append(*menuitem_view);
-    Gtk::Menu *viewmenu = Gtk::manage(new Gtk::Menu());
-    menuitem_view->set_submenu(*viewmenu);
-	
-	//Customer
-	Gtk::MenuItem *menuitem_view_customer = Gtk::manage(new Gtk::MenuItem("Customer", true));
-    menuitem_view_customer->signal_activate().connect([this] {this->on_view_customer_click();});
-    viewmenu->append(*menuitem_view_customer);
+	//	VIEW
+	Gtk::MenuItem *menuitem_view = Gtk::manage(new Gtk::MenuItem("_View", true));
+	menubar->append(*menuitem_view);
+	Gtk::Menu *viewmenu = Gtk::manage(new Gtk::Menu());
+	menuitem_view->set_submenu(*viewmenu);
 
-	//Peripheral
-	Gtk::MenuItem *menuitem_view_peripheral = Gtk::manage(new Gtk::MenuItem("Peripheral", true));
-    menuitem_view_peripheral->signal_activate().connect([this] {this->on_view_peripheral_click();});
-    viewmenu->append(*menuitem_view_peripheral);
+	//		VIEW > CUSTOMERS
+	Gtk::MenuItem *menuitem_view_customer = Gtk::manage(new Gtk::MenuItem("_Customers", true));
+	menuitem_view_customer->signal_activate().connect([this] {this->on_view_customer_click();});
+	viewmenu->append(*menuitem_view_customer);
 
-	//Desktop
-	Gtk::MenuItem *menuitem_view_desktop = Gtk::manage(new Gtk::MenuItem("Desktop", true));
-    menuitem_view_desktop->signal_activate().connect([this] {this->on_view_desktop_click();});
-    viewmenu->append(*menuitem_view_desktop);
+	//		VIEW > PERIPHERALS
+	Gtk::MenuItem *menuitem_view_peripheral = Gtk::manage(new Gtk::MenuItem("_Peripherals", 	true));
+	menuitem_view_peripheral->signal_activate().connect([this] {this->on_view_peripheral_click();});
+	viewmenu->append(*menuitem_view_peripheral);
 
-	//Order
-	Gtk::MenuItem *menuitem_view_order = Gtk::manage(new Gtk::MenuItem("Order", true));
-    menuitem_view_order->signal_activate().connect([this] {this->on_view_order_click();});
-    viewmenu->append(*menuitem_view_order);
+	//		VIEW > DESKTOPS
+	Gtk::MenuItem *menuitem_view_desktop = Gtk::manage(new Gtk::MenuItem("_Desktops", true));
+	menuitem_view_desktop->signal_activate().connect([this] {this->on_view_desktop_click();});
+	viewmenu->append(*menuitem_view_desktop);
 
-	//Insert
-	Gtk::MenuItem *menuitem_insert = Gtk::manage(new Gtk::MenuItem("Insert", true));
-    menubar->append(*menuitem_insert);
-    Gtk::Menu *insertmenu = Gtk::manage(new Gtk::Menu());
-    menuitem_insert->set_submenu(*insertmenu);
+	//		VIEW > ORDERS
+	Gtk::MenuItem *menuitem_view_order = Gtk::manage(new Gtk::MenuItem("_Orders", true));
+	menuitem_view_order->signal_activate().connect([this] {this->on_view_order_click();});
+	viewmenu->append(*menuitem_view_order);
 
-	//Customer
-	Gtk::MenuItem *menuitem_insert_customer = Gtk::manage(new Gtk::MenuItem("Customer", true));
-    menuitem_insert_customer->signal_activate().connect([this] {this->on_insert_customer_click();});
-    insertmenu->append(*menuitem_insert_customer);
+	//	INSERT
+	Gtk::MenuItem *menuitem_insert = Gtk::manage(new Gtk::MenuItem("_Insert", true));
+	menubar->append(*menuitem_insert);
+	Gtk::Menu *insertmenu = Gtk::manage(new Gtk::Menu());
+	menuitem_insert->set_submenu(*insertmenu);
 
-	//Peripheral
-	Gtk::MenuItem *menuitem_insert_peripheral = Gtk::manage(new Gtk::MenuItem("Peripheral", true));
-    menuitem_insert_peripheral->signal_activate().connect([this] {this->on_insert_peripheral_click();});
-    insertmenu->append(*menuitem_insert_peripheral);
+	//		INSERT > CUSTOMERS
+	Gtk::MenuItem *menuitem_insert_customer = Gtk::manage(new Gtk::MenuItem("_Customers", 		true));
+	menuitem_insert_customer->signal_activate().connect([this] {this->on_insert_customer_click();});
+	insertmenu->append(*menuitem_insert_customer);
 
-	//Desktop
-	Gtk::MenuItem *menuitem_insert_desktop = Gtk::manage(new Gtk::MenuItem("Desktop", true));
-    menuitem_insert_desktop->signal_activate().connect([this] {this->on_insert_desktop_click();});
-    insertmenu->append(*menuitem_insert_desktop);
+	//		INSERT > PERIPHERALS
+	Gtk::MenuItem *menuitem_insert_peripheral = Gtk::manage(new Gtk::MenuItem("_Peripherals", 		true));
+	menuitem_insert_peripheral->signal_activate().connect([this] {this->on_insert_peripheral_click();});
+	insertmenu->append(*menuitem_insert_peripheral);
 
-	//Order
-	Gtk::MenuItem *menuitem_insert_order = Gtk::manage(new Gtk::MenuItem("Order", true));
-    menuitem_insert_order->signal_activate().connect([this] {this->on_insert_order_click();});
-    insertmenu->append(*menuitem_insert_order);
+	//		INSERT > DESKTOPS
+	Gtk::MenuItem *menuitem_insert_desktop = Gtk::manage(new Gtk::MenuItem("_Desktops", true));
+	menuitem_insert_desktop->signal_activate().connect([this] {this->on_insert_desktop_click();});
+	insertmenu->append(*menuitem_insert_desktop);
 
-	
-    //     H E L P
-    // Create a Help menu and add to the menu bar
-    Gtk::MenuItem *menuitem_help = Gtk::manage(new Gtk::MenuItem("Help", true));
-    menubar->append(*menuitem_help);
-    Gtk::Menu *helpmenu = Gtk::manage(new Gtk::Menu());
-    menuitem_help->set_submenu(*helpmenu);
+	//		INSERT > ORDERS
+	Gtk::MenuItem *menuitem_insert_order = Gtk::manage(new Gtk::MenuItem("_Orders", true));
+	menuitem_insert_order->signal_activate().connect([this] {this->on_insert_order_click();});
+	insertmenu->append(*menuitem_insert_order);
 
-    //           A B O U T
-    // Append About to the Help menu
-    Gtk::MenuItem *menuitem_about = Gtk::manage(new Gtk::MenuItem("_About", true));
-    menuitem_about->signal_activate().connect([this] {this->on_about_click();});
-    helpmenu->append(*menuitem_about);
+	//	HELP
+	Gtk::MenuItem *menuitem_help = Gtk::manage(new Gtk::MenuItem("_Help", true));
+	menubar->append(*menuitem_help);
+	Gtk::Menu *helpmenu = Gtk::manage(new Gtk::Menu());
+	menuitem_help->set_submenu(*helpmenu);
 
+	//		HELP > ABOUT
+	Gtk::MenuItem *menuitem_about = Gtk::manage(new Gtk::MenuItem("_About", true));
+	menuitem_about->signal_activate().connect([this] {this->on_about_click();});
+	helpmenu->append(*menuitem_about);
 
+	//		HELP > EASTER
+	Gtk::MenuItem *menuitem_easter = Gtk::manage(new Gtk::MenuItem("_Easter Egg", true));
+	menuitem_easter->signal_activate().connect([this] {this->on_easter_egg_click();});
+	helpmenu->append(*menuitem_easter);
+
+	std::ifstream fp;
+	fp.open("test.txt");
+	// Options c = Options{"test", (double)22};
+	// c.save(fp);
+	Options c = Options(fp);
+	std::cout << c;
+
+	//DISPLAY WINDOW
 	data = Gtk::manage(new Gtk::Label());
 	data->set_hexpand(true);
 	data->set_vexpand(true);
 	vbox->add(*data);
 
-
+	//STATUS BAR
 	msg = Gtk::manage(new Gtk::Label());
 	msg->set_hexpand(true);
-	msg->override_background_color(Gdk::RGBA{"gray"});
 	vbox->pack_start(*msg, Gtk::PACK_SHRINK, 0);
-
-
-    // Make the box and everything in it visible
-    vbox->show_all();
-
-    
+	
+	vbox->show_all();
 }
 
-Mainwin::~Mainwin() { }
+Mainwin::~Mainwin(){ }
 
-
-void Mainwin::on_quit_click(){
-
+void Mainwin::on_quit_click()
+{
 	close();
 }
 
-void Mainwin::on_view_peripheral_click(){
+void Mainwin::on_view_peripheral_click()
+{
 	std::ostringstream oss;
-	for(int i = 0; i < store->num_options(); i++){
-		oss << i << ") " << store->option(i) << "\n";
-	}
-
+	for(int i=0; i < store->num_options(); i++)
+	        oss << i << ") " << store->option(i) << "\n";
 	set_data(oss.str());
 	set_msg("");
 }
+
+void Mainwin::on_view_desktop_click()
+{
+	std::ostringstream oss;
+	for(int i=0; i < store->num_desktops(); i++)
+	        oss << i << ") " << store->desktop(i) << "\n";
+	set_data(oss.str());
+	set_msg("");
+}
+
+void Mainwin::on_view_order_click()
+{
+	std::ostringstream oss;
+	for(int i=0; i < store->num_orders(); i++)
+	        oss << i << ") " << store->order(i) << "\n";
+	set_data(oss.str());
+	set_msg("");
+}
+
+void Mainwin::on_view_customer_click()
+{
+	std::ostringstream oss;
+	for(int i=0; i < store->num_customers(); i++)
+	        oss << i << ") " << store->customer(i) << "\n\n";
+	set_data(oss.str());
+	set_msg("");
+}
+
+void Mainwin::on_insert_peripheral_click()
+{
+	std::string s = get_string("Name of new peripheral? ");
+	double cost = get_double("Cost? ");
 	
-void Mainwin::on_view_desktop_click(){
-
-	std::ostringstream oss;
-	for(int i = 0; i < store->num_desktops(); i++){
-		oss << i << ") " << store->desktop(i) << "\n";
-	}
-	set_data(oss.str());
-	set_msg("");
-}
-
-void Mainwin::on_view_order_click(){
-
-	std::ostringstream oss;
-	for(int i = 0 ; i< store->num_orders(); i ++){
-		oss << i << ") " << store->order(i) << "\n";
-	}
-
-	set_data(oss.str());
-	set_msg("");
-}
-
-void Mainwin::on_view_customer_click(){
-	
-	std::ostringstream oss;
-	for(int i = 0; i < store->num_customers(); i++){
-		oss << i << ") " << store->customer(i) << "\n";
-	}
-
-	set_data(oss.str());
-	set_msg("");
-}
-
-void Mainwin::on_insert_peripheral_click(){
-	std::string str = get_string("Name of peripheral?");
-	double cost = get_double("Cost?");
-
-	if(cost){
-		Options option{str, cost};
+	if (cost) {
+		Options option{s, cost};
 		store->add_option(option);
-	}
-	else{
+	} 
+	else {
 		std::cin.clear();
-		std::cerr << "###INVALID PRICE ### \n\n";
+		std::cerr << "#### INVALID PRICE ####\n\n";
 		std::cin.ignore(32767, '\n');
 	}
-
-	set_msg("Peripheral successful.");
 	on_view_peripheral_click();
+	set_msg("ADDED NEW PERIPHERAL");
 }
 
-void Mainwin::on_insert_desktop_click(){
-
-	int deskt = store->new_desktop();
-	int check = 1;
-	while(check == 1){
-		std::cout << store->desktop(deskt) << "\n";
-		for(int i = 0; i <store->num_options(); i++){
-			std::cout << i << ") " << store->option(i) << '\n';
-		}
-
-		int option = get_int("\nAdd which peripheral (-1 when done)");
-		if(option == -1){
-			break;
-		}
-		try{
-			store->add_option(option, deskt);
-
-		} catch(std::exception& e){
-			std::cerr << "INVALID OPTION \n \n";
+void Mainwin::on_insert_desktop_click()
+{
+	on_view_peripheral_click();
+	int desktop = store->new_desktop();
+	while(true) {
+		int option = get_int("\nAdd which peripheral (-1 when done)? ");
+		if(option == -1) break;
+		try {
+	 		store->add_option(option, desktop);
+		} catch(std::exception& e) {
+		std::cerr << "#### INVALID OPTION ####\n\n";
 		}
 	}
-	set_msg("Desktop successful.");
 	on_view_desktop_click();
+	set_msg("ADDED NEW DESKTOP");
 }
 
-void Mainwin::on_insert_order_click(){
+void Mainwin::on_insert_order_click()
+{
 	int customer = -1;
-	int order = -1;
-	int desktop = -1;
-	try{
-			for(int i = 0; i < store->num_customers(); i++){
-				std::cout << i << ") " << store->customer(i) << '\n';
-			}
-			customer = get_int("Customer? " );
-			order = store->new_order(customer);
-			std::cout << "Order " << order << " created for customer " << customer << std::endl;
-			desktop = 0;
-	} catch(std::exception& e){
-		std::cerr << "### UNABLE TO CREATE ORDER FOR CUSTOMER " << customer << " ###\n" << std::endl;
-
+	int order    = -1;
+	int desktop  = -1;
+	try {
+		customer = get_int("Customer? ");
+		order = store->new_order(customer);
+		desktop = 0;
+	} catch(std::exception& e) {
+		std::cerr << "#### UNABLE TO CREATE ORDER FOR CUSTOMER " 
+			<< customer << " ####\n\n"; 
 	}
 
-	while(desktop >= 0){
-		for(int i = 0; i < store->num_desktops(); i++){
-			std::cout << i << ") " << store->desktop(i) << '\n';
-		}
+	while(desktop >= 0) {		
 		desktop = get_int("Desktop (-1 when done)? ");
-		if(desktop ==-1){
-			break;
-		}
-		try{
-				store->add_desktop(desktop, order);
-		} catch (std::exception& e){
-			std::cerr << "### UNABLE TO ADD DESKTOP " << desktop << "TO ORDER " << order << std::endl;
+		if(desktop == -1) break;
+		try {
+			store->add_desktop(desktop, order);
+		} catch (std::exception& e) {
+		std::cerr << "#### UNABLE TO ADD DESKTOP " << desktop
+			<< " TO ORDER " << order << std::endl;
 		desktop = 0;
 		}
 	}
-	set_msg("Order successful.");
 	on_view_order_click();
+	set_msg("ADDED NEW ORDER");
 }
 
-void Mainwin::on_insert_customer_click(){
-
-	std::string name = get_string("Customer name?");
-	if(name.size()){
-		std::string phone = get_string("Customer phone (xxx-xxx-xxxx)");
-		std::string email = get_string("Customer email (xxx@domain.com)?");
+void Mainwin::on_insert_customer_click()
+{
+	std::string name = get_string("Customer name? ");
+	if(name.size()) {
+		std::string phone = get_string("Customer phone (xxx-xxx-xxxx)? ");
+		std::string email = get_string("Customer email (xxx@domain.com)? ");
 		Customer customer{name, phone, email};
 		store->add_customer(customer);
 	}
-
-	set_msg("Customer successful.");
 	on_view_customer_click();
+	set_msg("ADDED NEW CUSTOMER");
 }
 
-void Mainwin::on_about_click(){
+void Mainwin::on_about_click()
+{
 	Gtk::AboutDialog dialog;
-    dialog.set_transient_for(*this); // Avoid the discouraging warning
-    dialog.set_program_name("ELSA");
-    auto logo = Gdk::Pixbuf::create_from_file("logo.png");
-    dialog.set_logo(logo);
-    dialog.set_version("Version 1");
-    dialog.set_copyright("Copyright 2020");
-    dialog.set_license_type(Gtk::License::LICENSE_GPL_3_0);
-    std::vector< Glib::ustring > authors = {"Ashlei Burrola"};
-    dialog.set_authors(authors);
-    std::vector< Glib::ustring > artists = {
-        "Ashlei Burrola (P.S. I am not a logo designer)"};
-    dialog.set_artists(artists);
-    dialog.run();
-	}
+	dialog.set_transient_for(*this); // Avoid the discouraging warning
+	dialog.set_program_name("ELSA");
+	dialog.set_version("Version 0.2");
+	dialog.set_copyright("Copyright 2019-2020");
+	dialog.set_license_type(Gtk::License::LICENSE_GPL_3_0);
+	std::vector< Glib::ustring > authors = {"Kendall B. Buchanan"};
+	dialog.set_authors(authors);
+	dialog.run();
+}
 
-std::string Mainwin::get_string(std::string prompt){
+	//UTILITY METHODS
+
+std::string Mainwin::get_string(std::string prompt)
+{
 	EntryDialog edialog(*this, prompt, true);
 	edialog.run();
 	return edialog.get_text();
 }
 
-double Mainwin::get_double(std::string prompt){
+
+double Mainwin::get_double(std::string prompt)
+{
 	return std::stod(get_string(prompt));
 }
 
-int Mainwin::get_int(std::string prompt){
+int Mainwin::get_int(std::string prompt)
+{
 	return std::stoi(get_string(prompt));
 }
 
-void Mainwin::set_data(std::string s){
-	data->set_text(s);
+
+void Mainwin::set_data(std::string s)
+{
+	data->set_markup(s);
 }
 
-void Mainwin::set_msg(std::string s){
-	msg->set_text(s);
+void Mainwin::set_msg(std::string s)
+{
+	msg->set_markup(s);
 }
 
+void Mainwin::on_new_store_click()
+{
+	
+}
 
+void Mainwin::on_save_click()
+{
+	try 
+	{
+		std::ofstream ofs{filename};
+		store->save(ofs);
+		if(!ofs) throw std::runtime_error{"Error writing file"};
+	} 
+	catch(std::exception& e) 
+	{
+		Gtk::MessageDialog{*this, "Unable to save file: "}.run();
+	}
+}
 
+void Mainwin::on_save_as_click() {
+	Gtk::FileChooserDialog dialog("Please choose a file",
+	  Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SAVE);
+	dialog.set_transient_for(*this);
 
-// void Mainwin::on_rules_click() {
-//     Glib::ustring s = R"(
-// <span size='24000' weight='bold'>The Rules of Nim</span>
-// <span size='large'>Copyright 2017-2020 by George F. Rice - CC BY 4.0</span>
+	auto filter_elsa = Gtk::FileFilter::create();
+	filter_elsa->set_name("ELSA files");
+	filter_elsa->add_pattern("*.elsa");
+	dialog.add_filter(filter_elsa);
 
-// The two players alternate taking 1 to 3 sticks from the pile. The goal is to force your opponent to take the last stick (called misère rules).
+	auto filter_any = Gtk::FileFilter::create();
+	filter_any->set_name("Any files");
+	filter_any->add_pattern("*");
+	dialog.add_filter(filter_any);
 
-// If the computer button is up, it's a two player game. If down, the computer is always Player 2.)";
-//     Gtk::MessageDialog{*this, s, true}.run(); // 'true' as 3rd parameter enables Pango markup
-// }
+	dialog.set_filename("untitled.elsa");
 
+	//Add response buttons the the dialog:
+	dialog.add_button("_Cancel", 0);
+	dialog.add_button("_Save", 1);
 
+	int result = dialog.run();
 
+	if (result == 1) 
+	{
+		filename = dialog.get_filename();
+		on_save_click();
+	}
+}
 
+void Mainwin::on_open_click()
+{
+	Gtk::FileChooserDialog dialog("Please choose a file",
+          Gtk::FileChooserAction::FILE_CHOOSER_ACTION_OPEN);
+	dialog.set_transient_for(*this);
 
+	auto filter_elsa = Gtk::FileFilter::create();
+	filter_elsa->set_name("ELSA files");
+	filter_elsa->add_pattern("*.elsa");
+	dialog.add_filter(filter_elsa);
+
+	auto filter_any = Gtk::FileFilter::create();
+	filter_any->set_name("Any files");
+	filter_any->add_pattern("*");
+	dialog.add_filter(filter_any);
+
+	dialog.set_filename("untitled.elsa");
+
+	//Add response buttons the the dialog:
+	dialog.add_button("_Cancel", 0);
+	dialog.add_button("_Open", 1);
+
+	int result = dialog.run();
+
+	if (result == 1) 
+	{
+
+		filename = dialog.get_filename();
+		try 
+		{
+			delete store;
+			std::ifstream ifs{filename};
+			store = new Store{ifs};
+
+////////////////	REFRESH DATA WINDOW WITH NEW DATA	////////////////
+
+			//set_data(ifs.str());
+			//bool b;
+			//ifs >> b;
+			//computer_player->set_active(b);
+			//if(!ifs) throw std::runtime_error{"File contents bad"};
+			//set_sticks();
+		} 
+		catch (std::exception& e) 
+		{
+			Gtk::MessageDialog{*this, "Unable to open file"}.run();
+		}
+	}
+}
+
+void Mainwin::on_easter_egg_click() {
+	Customer c{"Bugs Bunny", "817-ACA-RROT", "bugs@loony.tunes"};          store->add_customer(c);
+	c = Customer{"Elastigirl", "817-STR-ETCH", "helen@incredibles.movie"}; store->add_customer(c);
+	c = Customer{"Tuck and Roll", "817-UFI-RED2", "circus@bugs.life"};     store->add_customer(c);
+	c = Customer{"Tiana", "817-NOG-RIMM", "princess@lily.pad"};            store->add_customer(c);
+
+	Options o{"CPU: 2.6 GHz Xeon 6126T", 2423.47};         store->add_option(o);
+	o = Options{"CPU: 2.4 GHz Core i7-8565U", 388.0};      store->add_option(o);
+	o = Options{"CPU: 2.2 GHz AMD Opteron", 37.71};        store->add_option(o);
+	o = Options{"CPU: 300 MHz AM3351BZCEA30R ARM", 11.03}; store->add_option(o);
+	o = Options{"CPU: 240 MHz ColdFire MCF5", 17.33};      store->add_option(o);
+
+	o = Options{"2 GB RAM", 17.76};                        store->add_option(o);
+	o = Options{"4 GB RAM", 22.95};                        store->add_option(o);
+	o = Options{"8 GB RAM", 34.99};                        store->add_option(o);
+	o = Options{"16 GB RAM", 92.99};                       store->add_option(o);
+	o = Options{"32 GB RAM", 134.96};                      store->add_option(o);
+	o = Options{"64 GB RAM", 319.99};                      store->add_option(o);
+
+	o = Options{"0.5 TB SSD", 79.99};                      store->add_option(o);
+	o = Options{"1 TB SSD", 109.99};                       store->add_option(o);
+	o = Options{"2 TB SSD", 229.99};                       store->add_option(o);
+	o = Options{"4 TB SSD", 599.99};                       store->add_option(o);
+
+	o = Options{"1 TB PC Disk", 44.83};                    store->add_option(o);
+	o = Options{"2 TB Hybrid Disk", 59.99};                store->add_option(o);
+	o = Options{"4 TB Hybrid Disk", 93.98};                store->add_option(o);
+
+	int desktop = store->new_desktop();
+	store->add_option(0, desktop);
+	store->add_option(9, desktop);
+	store->add_option(14, desktop);
+
+	desktop = store->new_desktop();
+	store->add_option(1, desktop);
+	store->add_option(7, desktop);
+	store->add_option(17, desktop);
+
+	desktop = store->new_desktop();
+	store->add_option(5, desktop);
+	store->add_option(7, desktop);
+	store->add_option(15, desktop);
+}
 
