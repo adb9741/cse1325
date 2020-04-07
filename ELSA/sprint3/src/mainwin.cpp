@@ -354,8 +354,7 @@ void Mainwin::on_save_as_click() {
 
 void Mainwin::on_open_click()
 {
-	Gtk::FileChooserDialog dialog("Please choose a file",
-          Gtk::FileChooserAction::FILE_CHOOSER_ACTION_OPEN);
+	Gtk::FileChooserDialog dialog("Please choose a file", Gtk::FileChooserAction::FILE_CHOOSER_ACTION_OPEN);
 	dialog.set_transient_for(*this);
 
 	auto filter_elsa = Gtk::FileFilter::create();
@@ -386,14 +385,7 @@ void Mainwin::on_open_click()
 			std::ifstream ifs{filename};
 			store = new Store{ifs};
 
-////////////////	REFRESH DATA WINDOW WITH NEW DATA	////////////////
 
-			//set_data(ifs.str());
-			//bool b;
-			//ifs >> b;
-			//computer_player->set_active(b);
-			//if(!ifs) throw std::runtime_error{"File contents bad"};
-			//set_sticks();
 		} 
 		catch (std::exception& e) 
 		{
