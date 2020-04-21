@@ -291,25 +291,26 @@ void Mainwin::on_insert_customer_click()
 
 	if((response = dialog.run()) ==  Gtk::RESPONSE_OK){
 		int confirm;
-		while(confirm != Gtk::RESPONSE_OK){
-			if(entryname.get_text().size() ==0){
-				entryname.set_text("*required*");
-			}
-			if(entryphone.get_text().size() == 0){
-				entryphone.set_text("*required*");
-			}
-			if(entryemail.get_text().size() == 0){
-				entryemail.set_text("*required*");
-			}
+		if(entryname.get_text().size() == 0 || entryphone.get_text().size() == 0 || entryemail.get_text().size() == 0){
+			while(confirm != Gtk::RESPONSE_OK){
+				if(entryname.get_text().size() == 0){
+					entryname.set_text("*required*");
+				}
+				if(entryphone.get_text().size() == 0){
+					entryphone.set_text("*required*");
+				}
+				if(entryemail.get_text().size() == 0){
+					entryemail.set_text("*required*");
+				}
 
-			Gtk::Dialog warning {"WARNING", *this};
-			Gtk::Label _warning{"INVALID DATA"};
-			warning.get_content_area()->pack_start(_warning, Gtk::PACK_SHRINK, 0);
-			warning.add_button("Ok", Gtk::RESPONSE_OK);
-			warning.show_all();
-			confirm = warning.run();
-			set_msg("Invalid data, try again");
-
+				Gtk::Dialog warning {"WARNING", *this};
+				Gtk::Label _warning{"INVALID DATA"};
+				warning.get_content_area()->pack_start(_warning, Gtk::PACK_SHRINK, 0);
+				warning.add_button("Ok", Gtk::RESPONSE_OK);
+				warning.show_all();
+				confirm = warning.run();
+				set_msg("Invalid data, try again");
+			}
 		
 		}
 
