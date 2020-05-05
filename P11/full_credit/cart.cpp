@@ -30,8 +30,7 @@ void Cart::add_item(Item& item) {
 double Cart::cost() {
     double total;
     for(int i = 0; i < items.size(); i++){
-        double tempdouble;
-        tempdouble = items[i]->cost();
+        double tempdouble = items[i]->cost();
         total = total + tempdouble;
     }
     return total;

@@ -12,6 +12,7 @@ int main() {
         cart.add_item(i);
     }
     
+    std::cout << "Register Receipt\n";
     for(std::vector<Item*>::iterator items = cart.begin(); items!=cart.end(); ++items){
         std::cout << **items;
     }
